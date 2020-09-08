@@ -61,35 +61,42 @@ namespace BankAccountWebAPI.Controllers
         [Route("Withdraw/{bankAccId}/{amount}")]
         public ActionResult Withdraw(int bankAccId, decimal amount)
         {
-            BankAccount acc;
-
-            // Retrieve bank account
-            if(!bankAccountReader.Read(bankAccId, out acc))
+            try
             {
-                return NotFound("Unable to find bank account with the given ID (" + bankAccId + ")");
+                BankAccount acc;
+
+                // Retrieve bank account
+                if(!bankAccountReader.Read(bankAccId, out acc))
+                {
+                    return NotFound("Unable to find bank account with the given ID (" + bankAccId + ")");
+                }
+
+                // Creates the object with all the data necessary to perform a Withdraw
+                SingleAccountOperation withdrawOp = new SingleAccountOperation(acc);
+                withdrawOp.Amount = amount;
+                withdrawOp.OperationType = OperationType.WIDTHDRAW;
+        
+                // Creates the object responsible for carrying out the withdraw operation
+                WidthdrawHandler opHandler = new WidthdrawHandler();
+
+                // Creates the object responsible for calculating the tax associate with the operation
+                SingleAccountOpTaxHandler taxHandler = new SingleAccountOpTaxHandler(opHandler);
+
+                // Creates the object responsible for persisting the operation 
+                SingleAccountOpPersistHandler persistHandler = new SingleAccountOpPersistHandler(taxHandler, singleAccOpPersist);
+
+                // Executes the widhtraw
+                if(!persistHandler.Execute(withdrawOp))
+                {
+                    return StatusCode((int)HttpStatusCode.InternalServerError, "Unable to execute transfer.");
+                }
+
+                return Ok(acc);
             }
-
-            // Creates the object with all the data necessary to perform a Withdraw
-            SingleAccountOperation withdrawOp = new SingleAccountOperation(acc);
-            withdrawOp.Amount = amount;
-            withdrawOp.OperationType = OperationType.WIDTHDRAW;
-       
-            // Creates the object responsible for carrying out the withdraw operation
-            WidthdrawHandler opHandler = new WidthdrawHandler();
-
-            // Creates the object responsible for calculating the tax associate with the operation
-            SingleAccountOpTaxHandler taxHandler = new SingleAccountOpTaxHandler(opHandler);
-
-            // Creates the object responsible for persisting the operation 
-            SingleAccountOpPersistHandler persistHandler = new SingleAccountOpPersistHandler(taxHandler, singleAccOpPersist);
-
-            // Executes the widhtraw
-            if(!persistHandler.Execute(withdrawOp))
+            catch(Exception ex)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, "Unable to execute transfer.");
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Exception msg: " + ex.Message);
             }
-
-            return Ok(acc);
         }
 
         [HttpPost]
@@ -97,35 +104,42 @@ namespace BankAccountWebAPI.Controllers
         [Route("Deposit/{bankAccId}/{amount}")]
         public ActionResult Deposit(int bankAccId, decimal amount)
         {
-            BankAccount acc;
-
-            // Retrieve bank account
-            if(!bankAccountReader.Read(bankAccId, out acc))
+            try
             {
-                return NotFound("Unable to find bank account with the given ID (" + bankAccId + ")");
+                BankAccount acc;
+
+                // Retrieve bank account
+                if(!bankAccountReader.Read(bankAccId, out acc))
+                {
+                    return NotFound("Unable to find bank account with the given ID (" + bankAccId + ")");
+                }
+
+                // Creates the object with all the data necessary to perform a deposit
+                SingleAccountOperation depositOp = new SingleAccountOperation(acc);
+                depositOp.Amount = amount;
+                depositOp.OperationType = OperationType.DEPOSIT;
+
+                // Creates the object responsible for carrying out the deposit operation
+                DepositHandler opHandler = new DepositHandler();
+
+                // Creates the object responsible for calculating the tax associate with the operation
+                SingleAccountOpTaxHandler taxHandler = new SingleAccountOpTaxHandler(opHandler);
+
+                // Creates the object responsible for persisting the operation 
+                SingleAccountOpPersistHandler persistHandler = new SingleAccountOpPersistHandler(taxHandler, singleAccOpPersist);
+
+                // Executes the widhtraw
+                if(!persistHandler.Execute(depositOp))
+                {
+                    return StatusCode((int)HttpStatusCode.InternalServerError, "Unable to execute transfer.");
+                }
+
+                return Ok(acc);
             }
-
-            // Creates the object with all the data necessary to perform a deposit
-            SingleAccountOperation depositOp = new SingleAccountOperation(acc);
-            depositOp.Amount = amount;
-            depositOp.OperationType = OperationType.DEPOSIT;
-
-            // Creates the object responsible for carrying out the deposit operation
-            DepositHandler opHandler = new DepositHandler();
-
-            // Creates the object responsible for calculating the tax associate with the operation
-            SingleAccountOpTaxHandler taxHandler = new SingleAccountOpTaxHandler(opHandler);
-
-            // Creates the object responsible for persisting the operation 
-            SingleAccountOpPersistHandler persistHandler = new SingleAccountOpPersistHandler(taxHandler, singleAccOpPersist);
-
-            // Executes the widhtraw
-            if(!persistHandler.Execute(depositOp))
+            catch(Exception ex)
             {
-                return StatusCode((int)HttpStatusCode.InternalServerError, "Unable to execute transfer.");
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Exception msg: " + ex.Message);
             }
-
-            return Ok(acc);
         }
 
         [HttpPost]
@@ -133,41 +147,48 @@ namespace BankAccountWebAPI.Controllers
         [Route("Transfer/{sourceAccId}/{destAccId}/{amount}")]
         public ActionResult Transfer(int sourceAccId, int destAccId, decimal amount)
         {
-            BankAccount sourceAcc, destAcc;
-
-            // Retrieve source bank account
-            if(!bankAccountReader.Read(sourceAccId, out sourceAcc))
+            try
             {
-                return NotFound("Unable to find source bank account with the given ID (" + sourceAccId + ")");
-            }
+                BankAccount sourceAcc, destAcc;
 
-            // Retrieve dest bank account
-            if(!bankAccountReader.Read(destAccId, out destAcc))
+                // Retrieve source bank account
+                if(!bankAccountReader.Read(sourceAccId, out sourceAcc))
+                {
+                    return NotFound("Unable to find source bank account with the given ID (" + sourceAccId + ")");
+                }
+
+                // Retrieve dest bank account
+                if(!bankAccountReader.Read(destAccId, out destAcc))
+                {
+                    return NotFound("Unable to find dest bank account with the given ID (" + destAccId + ")");
+                }
+
+                // Creates the object with all the data necessary to perform a deposit
+                DoubleAccountOperation transferOp = new DoubleAccountOperation(sourceAcc, destAcc);
+                transferOp.Amount = amount;
+                transferOp.OperationType = OperationType.TRANSFERENCE;
+
+                // Creates the object responsible for carrying out the deposit operation
+                TransferHandler opHandler = new TransferHandler();
+
+                // Creates the object responsible for calculating the tax associate with the operation
+                DoubleAccountOpTaxHandler taxHandler = new DoubleAccountOpTaxHandler(opHandler);
+
+                // Creates the object responsible for persisting the operation 
+                DoubleAccountOpPersistHandler persistHandler = new DoubleAccountOpPersistHandler(taxHandler, doubleAccOpPersist);
+
+                // Executes the widhtraw
+                if(!persistHandler.Execute(transferOp))
+                {
+                    return StatusCode((int)HttpStatusCode.InternalServerError, "Unable to execute transfer.");
+                }
+
+                return Ok(destAcc);
+            }
+            catch(Exception ex)
             {
-                return NotFound("Unable to find dest bank account with the given ID (" + destAccId + ")");
+                return StatusCode((int)HttpStatusCode.InternalServerError, "Exception msg: " + ex.Message);
             }
-
-            // Creates the object with all the data necessary to perform a deposit
-            DoubleAccountOperation transferOp = new DoubleAccountOperation(sourceAcc, destAcc);
-            transferOp.Amount = amount;
-            transferOp.OperationType = OperationType.TRANSFERENCE;
-
-            // Creates the object responsible for carrying out the deposit operation
-            TransferHandler opHandler = new TransferHandler();
-
-            // Creates the object responsible for calculating the tax associate with the operation
-            DoubleAccountOpTaxHandler taxHandler = new DoubleAccountOpTaxHandler(opHandler);
-
-            // Creates the object responsible for persisting the operation 
-            DoubleAccountOpPersistHandler persistHandler = new DoubleAccountOpPersistHandler(taxHandler, doubleAccOpPersist);
-
-            // Executes the widhtraw
-            if(!persistHandler.Execute(transferOp))
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError, "Unable to execute transfer.");
-            }
-
-            return Ok(destAcc);
         }
 
         [HttpGet]
