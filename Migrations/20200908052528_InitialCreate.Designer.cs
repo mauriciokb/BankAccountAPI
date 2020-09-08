@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BankAccountWebAPI.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20200908025146_InitialMigrate")]
-    partial class InitialMigrate
+    [Migration("20200908052528_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
