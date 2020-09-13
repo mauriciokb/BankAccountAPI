@@ -6,7 +6,7 @@ namespace BankAccountWebAPI
     class BankStatement
     {
         const int FirstColPadding = 25;
-        const int SecondColPadding = 15;
+        const int SecondColPadding = 20;
 
         private Account account;
 
@@ -44,7 +44,7 @@ namespace BankAccountWebAPI
                 if(op is DoubleAccountOperation doubleAccOp)
                 {
                     string opSignal = (account.AccountId == doubleAccOp.PrimaryAcc.AccountId) ? "-" : "+";
-                    string extraInfo = (account.AccountId == doubleAccOp.PrimaryAcc.AccountId) ? doubleAccOp.SecondaryAcc.OwnerName : doubleAccOp.PrimaryAcc.OwnerName; 
+                    string extraInfo = (account.AccountId == doubleAccOp.PrimaryAcc.AccountId) ? "To: " + doubleAccOp.SecondaryAcc.OwnerName : "From: " + doubleAccOp.PrimaryAcc.OwnerName; 
                     taxAmount = (account.AccountId == doubleAccOp.PrimaryAcc.AccountId) ? doubleAccOp.TaxAmount : doubleAccOp.ExtraTaxAmount;
                     
                     string opInfo = opString = string.Format("{0}{1}{2}", datetimeStr, operationStr, opSignal + amountStr);
