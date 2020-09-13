@@ -16,9 +16,9 @@ namespace BankAccountWebAPI.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "3.1.7");
 
-            modelBuilder.Entity("BankAccountWebAPI.BankAccount", b =>
+            modelBuilder.Entity("BankAccountWebAPI.Account", b =>
                 {
-                    b.Property<int>("BankAccountId")
+                    b.Property<int>("AccountId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
@@ -28,7 +28,7 @@ namespace BankAccountWebAPI.Migrations
                     b.Property<string>("OwnerName")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("BankAccountId");
+                    b.HasKey("AccountId");
 
                     b.ToTable("BankAccounts");
                 });
@@ -52,7 +52,7 @@ namespace BankAccountWebAPI.Migrations
                     b.Property<int>("OperationType")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("PrimaryBankAccId")
+                    b.Property<int>("PrimaryAccId")
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("TaxAmount")
@@ -60,7 +60,7 @@ namespace BankAccountWebAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PrimaryBankAccId");
+                    b.HasIndex("PrimaryAccId");
 
                     b.ToTable("SingleAccOperations");
 
@@ -74,28 +74,28 @@ namespace BankAccountWebAPI.Migrations
                     b.Property<decimal>("ExtraTaxAmount")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("SecondaryBankAccId")
+                    b.Property<int>("SecondaryAccId")
                         .HasColumnType("INTEGER");
 
-                    b.HasIndex("SecondaryBankAccId");
+                    b.HasIndex("SecondaryAccId");
 
                     b.HasDiscriminator().HasValue("DoubleAccountOperation");
                 });
 
             modelBuilder.Entity("BankAccountWebAPI.SingleAccountOperation", b =>
                 {
-                    b.HasOne("BankAccountWebAPI.BankAccount", "PrimaryBankAcc")
+                    b.HasOne("BankAccountWebAPI.Account", "PrimaryAcc")
                         .WithMany()
-                        .HasForeignKey("PrimaryBankAccId")
+                        .HasForeignKey("PrimaryAccId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
             modelBuilder.Entity("BankAccountWebAPI.DoubleAccountOperation", b =>
                 {
-                    b.HasOne("BankAccountWebAPI.BankAccount", "SecondaryBankAcc")
+                    b.HasOne("BankAccountWebAPI.Account", "SecondaryAcc")
                         .WithMany()
-                        .HasForeignKey("SecondaryBankAccId")
+                        .HasForeignKey("SecondaryAccId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

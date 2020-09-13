@@ -5,21 +5,21 @@ namespace BankAccountWebAPI
     /// <summary>
     /// Represents a simple bank account
     /// </summary>
-    public class BankAccount
+    public class Account
     {    
-        public int BankAccountId { get; private set; }
+        public int AccountId { get; private set; }
 
         public string OwnerName { get; private set; }
 
         public decimal Balance { get; private set; }
 
-        public BankAccount(int bankAccountId, string ownerName, decimal balance)
+        public Account(int accountId, string ownerName, decimal balance)
         {
-            BankAccountId = bankAccountId;
+            AccountId = accountId;
             OwnerName = ownerName;
             Balance = balance;
         }
-        public BankAccount(string OwnerName)
+        public Account(string OwnerName)
         {
             this.OwnerName = OwnerName;
             this.Balance = 0;

@@ -7,7 +7,7 @@ namespace BankAccountWebAPI
 {
     public class Context : DbContext
     {
-        public DbSet<BankAccount> BankAccounts { get; set; }
+        public DbSet<Account> BankAccounts { get; set; }
         public DbSet<SingleAccountOperation> SingleAccOperations { get; set; }
         public DbSet<DoubleAccountOperation> DoubleAccOperations { get; set; }
 

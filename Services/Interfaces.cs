@@ -15,8 +15,10 @@ namespace BankAccountWebAPI
         bool Persist(T data);
     }
 
-    public interface IRead<T>
+    public interface IReadData
     {
-        bool Read(int id, out T data);
+        bool GetAccountById(int id, out Account data);
+  
+        bool GetOperationsByAccountId(int id, out System.Collections.Generic.List<SingleAccountOperation> operations);
     }
 }

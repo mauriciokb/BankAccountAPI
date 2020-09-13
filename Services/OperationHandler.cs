@@ -10,7 +10,9 @@ public class WidthdrawHandler : IOperation<SingleAccountOperation>
     {
         decimal ammountToWithdraw = opData.Amount + opData.TaxAmount;
 
-        return opData.PrimaryBankAcc.Widthdraw(ammountToWithdraw);
+        opData.ExecutionTimeStamp = System.DateTime.Now;
+
+        return opData.PrimaryAcc.Widthdraw(ammountToWithdraw);        
     }
 }
 
@@ -23,7 +25,9 @@ public class DepositHandler : IOperation<SingleAccountOperation>
     {
         decimal ammountToDeposit = opData.Amount + opData.TaxAmount;
 
-        opData.PrimaryBankAcc.Deposit(ammountToDeposit);
+        opData.PrimaryAcc.Deposit(ammountToDeposit);
+
+        opData.ExecutionTimeStamp = System.DateTime.Now;
 
         return true;
     }
@@ -39,14 +43,17 @@ public class TransferHandler : IOperation<DoubleAccountOperation>
         decimal ammountToWithdraw = opData.Amount + opData.TaxAmount;
 
         // Withdraws from the primary (source) account
-        bool withdrawResult = opData.PrimaryBankAcc.Widthdraw(ammountToWithdraw);
+        bool withdrawResult = opData.PrimaryAcc.Widthdraw(ammountToWithdraw);
 
-        if(withdrawResult)
+        if (withdrawResult)
         {
             decimal ammountToDeposit = opData.Amount + opData.ExtraTaxAmount;
 
             // Deposits the same amount (plus taxes) to the secondary (destination) account
-            opData.SecondaryBankAcc.Deposit(ammountToDeposit);
+            opData.SecondaryAcc.Deposit(ammountToDeposit);
+
+            opData.ExecutionTimeStamp = System.DateTime.Now;
+
             return true;
         }
 

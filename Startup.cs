@@ -28,10 +28,11 @@ namespace BankAccountWebAPI
             Context context = new Context();
 
             // Injects the controller with the classes that uses SQLite with Entity to persist data
-            services.AddSingleton<IPersist<BankAccount>>(entity => new EntityBankAccount(context));
-            services.AddSingleton<IRead<BankAccount>>(entity => new EntityBankAccount(context));
-            services.AddSingleton<IPersist<SingleAccountOperation>>(entity => new EntitySingleAccOp(context));
-            services.AddSingleton<IPersist<DoubleAccountOperation>>(entity => new EntityDoubleAccOp(context));
+            // services.AddSingleton<IPersist<BankAccount>>(entity => new EntityBankAccount(context));
+            services.AddSingleton<IReadData>(entity => new DatabaseReader(context));
+            // services.AddSingleton<IPersist<SingleAccountOperation>>(entity => new EntitySingleAccOp(context));
+            // services.AddSingleton<IPersist<DoubleAccountOperation>>(entity => new EntityDoubleAccOp(context));
+            services.AddSingleton<IPersist<object>>(entity => new DatabasePersistence(context));
 
             services.AddControllers();
         }
@@ -49,11 +50,13 @@ namespace BankAccountWebAPI
             app.UseRouting();
 
             app.UseAuthorization();
-
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-            });
+            });        
+
+          
         }
     }
 }

@@ -11,14 +11,14 @@ namespace BankAccountWebAPI.Migrations
                 name: "BankAccounts",
                 columns: table => new
                 {
-                    BankAccountId = table.Column<int>(nullable: false)
+                    AccountId = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     OwnerName = table.Column<string>(nullable: true),
                     Balance = table.Column<decimal>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BankAccounts", x => x.BankAccountId);
+                    table.PrimaryKey("PK_BankAccounts", x => x.AccountId);
                 });
 
             migrationBuilder.CreateTable(
@@ -31,37 +31,37 @@ namespace BankAccountWebAPI.Migrations
                     TaxAmount = table.Column<decimal>(nullable: false),
                     ExecutionTimeStamp = table.Column<DateTime>(nullable: false),
                     OperationType = table.Column<int>(nullable: false),
-                    PrimaryBankAccId = table.Column<int>(nullable: false),
+                    PrimaryAccId = table.Column<int>(nullable: false),
                     Discriminator = table.Column<string>(nullable: false),
-                    SecondaryBankAccId = table.Column<int>(nullable: true),
+                    SecondaryAccId = table.Column<int>(nullable: true),
                     ExtraTaxAmount = table.Column<decimal>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SingleAccOperations", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SingleAccOperations_BankAccounts_SecondaryBankAccId",
-                        column: x => x.SecondaryBankAccId,
+                        name: "FK_SingleAccOperations_BankAccounts_SecondaryAccId",
+                        column: x => x.SecondaryAccId,
                         principalTable: "BankAccounts",
-                        principalColumn: "BankAccountId",
+                        principalColumn: "AccountId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_SingleAccOperations_BankAccounts_PrimaryBankAccId",
-                        column: x => x.PrimaryBankAccId,
+                        name: "FK_SingleAccOperations_BankAccounts_PrimaryAccId",
+                        column: x => x.PrimaryAccId,
                         principalTable: "BankAccounts",
-                        principalColumn: "BankAccountId",
+                        principalColumn: "AccountId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_SingleAccOperations_SecondaryBankAccId",
+                name: "IX_SingleAccOperations_SecondaryAccId",
                 table: "SingleAccOperations",
-                column: "SecondaryBankAccId");
+                column: "SecondaryAccId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SingleAccOperations_PrimaryBankAccId",
+                name: "IX_SingleAccOperations_PrimaryAccId",
                 table: "SingleAccOperations",
-                column: "PrimaryBankAccId");
+                column: "PrimaryAccId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

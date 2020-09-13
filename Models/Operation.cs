@@ -9,10 +9,10 @@ namespace BankAccountWebAPI
     {
         public SingleAccountOperation(){}
 
-        public SingleAccountOperation(BankAccount bankAccount)
+        public SingleAccountOperation(Account account)
         {
-            this.PrimaryBankAcc = bankAccount;
-            this.PrimaryBankAccId = bankAccount.BankAccountId;
+            this.PrimaryAcc = account;
+            this.PrimaryAccId = account.AccountId;
         }
 
         public int Id { get; set; }
@@ -25,10 +25,10 @@ namespace BankAccountWebAPI
 
         public OperationType OperationType { get; set; }
         
-        [ForeignKey("PrimaryBankAcc")]
-        public int PrimaryBankAccId { get; set; }
+        [ForeignKey("PrimaryAcc")]
+        public int PrimaryAccId { get; set; }
 
-        public virtual BankAccount PrimaryBankAcc { get; set; }
+        public virtual Account PrimaryAcc { get; set; }
     
     }
 
@@ -39,17 +39,17 @@ namespace BankAccountWebAPI
     {
         public DoubleAccountOperation(){}
 
-        public DoubleAccountOperation(BankAccount primaryBankAcc, BankAccount secondaryBankAcc)
-        : base(primaryBankAcc)
+        public DoubleAccountOperation(Account primaryAcc, Account secondaryAcc)
+        : base(primaryAcc)
         {
-            this.SecondaryBankAcc = secondaryBankAcc;
-            this.SecondaryBankAccId = SecondaryBankAccId;
+            this.SecondaryAcc = secondaryAcc;
+            this.SecondaryAccId = secondaryAcc.AccountId;
         }
         
-        [ForeignKey("SecondaryBankAcc")]
-        public int SecondaryBankAccId { get; set; }
+        [ForeignKey("SecondaryAcc")]
+        public int SecondaryAccId { get; set; }
         
-        public virtual BankAccount SecondaryBankAcc { get; set; }
+        public virtual Account SecondaryAcc { get; set; }
 
         public decimal ExtraTaxAmount { get; set; }
     }
