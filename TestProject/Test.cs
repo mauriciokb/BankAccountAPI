@@ -52,33 +52,6 @@ namespace TestProject
         }
 
         [Test]
-        public void Withdraw_NegativeAmount_ThrowsOutOfRangeException()
-        {
-            try
-            {
-                controller.Withdraw(1, -1m);
-            }
-            catch (System.ArgumentOutOfRangeException)
-            {
-                Assert.Pass();
-            }          
-        }
-
-        [Test]
-        public void Transference_NegativeAmount_ThrowsOutOfRangeException()
-        {
-            try
-            {
-                controller.Transfer(1, 2, -1m);
-            }
-            catch (System.ArgumentOutOfRangeException)
-            {
-                Assert.Pass();
-            }           
-        }
-
-
-        [Test]
         public void Deposit_InvalidAccount_ThrowsKeyNotFoundException()
         {
             try
@@ -90,7 +63,35 @@ namespace TestProject
             catch (System.Collections.Generic.KeyNotFoundException)
             {
                 Assert.Pass();
-            }           
+            }
+        }
+
+        [Test]
+        public void Deposit_Deposits10DollarsAtAnAccountWith20DollarsBalance_NewBalanceShouldBe29DollarsAnd90Cents()
+        {
+            // Mocks the reader to returns a bank account with 20 bucks
+            dataReaderMock.Setup(reader => reader.GetAccountById(It.IsAny<int>())).Returns(new Account(1, "Pedro", 20));
+
+            // Then deposits 10 bucks
+            // Since the tax for this kind of operation is 1% of the deposited amount, 
+            // the returned account must have balance equals to 29,9 dollars
+            Microsoft.AspNetCore.Mvc.OkObjectResult returnedValue = (Microsoft.AspNetCore.Mvc.OkObjectResult)controller.Deposit(1, 10);
+
+            Assert.AreEqual(29.9m, ((Account)returnedValue.Value).Balance);
+        }
+
+
+        [Test]
+        public void Withdraw_NegativeAmount_ThrowsOutOfRangeException()
+        {
+            try
+            {
+                controller.Withdraw(1, -1m);
+            }
+            catch (System.ArgumentOutOfRangeException)
+            {
+                Assert.Pass();
+            }          
         }
 
         [Test]
@@ -105,25 +106,8 @@ namespace TestProject
             catch (System.Collections.Generic.KeyNotFoundException)
             {
                 Assert.Pass();
-            }           
-        }
-
-        [Test]
-        public void Transference_InvalidAccount_ThrowsKeyNotFoundException()
-        {
-            try
-            {
-                // Mocks the reader to returns destAcc if passed accId matches
-                dataReaderMock.Setup(reader => reader.GetAccountById(It.IsAny<int>())).Returns(() => null );
-
-                controller.Transfer(1, 0, 5);
             }
-            catch (System.Collections.Generic.KeyNotFoundException)
-            {
-                Assert.Pass();
-            }          
         }
-
 
         [Test]
         public void Withdraw_AccountWithInsufficientBalance_ShouldThrowInvalidOperationException()
@@ -139,9 +123,51 @@ namespace TestProject
             catch (System.InvalidOperationException)
             {
                 Assert.Pass();
-            }          
+            }
         }
 
+        [Test]
+        public void Withdraw_Withdraws10DollarsFromAccountWith20DollarsBalance_ShouldRemain6Dollars()
+        {
+            // Mocks the reader to returns a bank account with 20 bucks
+            dataReaderMock.Setup(reader => reader.GetAccountById(It.IsAny<int>())).Returns(new Account(1, "Pedro", 20));
+
+            // Then withdraws 10 bucks
+            // Since the tax for this kind of operation is 4 dollars, 
+            // the returned account must have balance equals to 6 dollars
+            Microsoft.AspNetCore.Mvc.OkObjectResult returnedValue = (Microsoft.AspNetCore.Mvc.OkObjectResult)controller.Withdraw(1, 10);
+
+            Assert.AreEqual(6m, ((Account)returnedValue.Value).Balance);
+        }
+
+        [Test]
+        public void Transference_NegativeAmount_ThrowsOutOfRangeException()
+        {
+            try
+            {
+                controller.Transfer(1, 2, -1m);
+            }
+            catch (System.ArgumentOutOfRangeException)
+            {
+                Assert.Pass();
+            }           
+        }       
+      
+        [Test]
+        public void Transference_InvalidAccount_ThrowsKeyNotFoundException()
+        {
+            try
+            {
+                // Mocks the reader to returns destAcc if passed accId matches
+                dataReaderMock.Setup(reader => reader.GetAccountById(It.IsAny<int>())).Returns(() => null );
+
+                controller.Transfer(1, 0, 5);
+            }
+            catch (System.Collections.Generic.KeyNotFoundException)
+            {
+                Assert.Pass();
+            }          
+        }     
 
         [Test]
         public void Transference_AccountWithInsufficientBalance_ShouldThrowInvalidOperationException()
@@ -175,37 +201,7 @@ namespace TestProject
             {
                 Assert.Pass();
             }         
-        }
-
-
-        [Test]
-        public void Withdraw_Withdraws10DollarsFromAccountWith20DollarsBalance_ShouldRemain6Dollars()
-        {
-            // Mocks the reader to returns a bank account with 20 bucks
-            dataReaderMock.Setup(reader => reader.GetAccountById(It.IsAny<int>())).Returns(new Account(1, "Pedro", 20));
-
-            // Then withdraws 10 bucks
-            // Since the tax for this kind of operation is 4 dollars, 
-            // the returned account must have balance equals to 6 dollars
-            Microsoft.AspNetCore.Mvc.OkObjectResult returnedValue = (Microsoft.AspNetCore.Mvc.OkObjectResult)controller.Withdraw(1, 10);
-
-            Assert.AreEqual(6m, ((Account)returnedValue.Value).Balance);                     
-        }
-
-        [Test]
-        public void Deposit_Deposits10DollarsAtAnAccountWith20DollarsBalance_NewBalanceShouldBe29DollarsAnd90Cents()
-        {        
-            // Mocks the reader to returns a bank account with 20 bucks
-            dataReaderMock.Setup(reader => reader.GetAccountById(It.IsAny<int>())).Returns(new Account(1, "Pedro", 20));
-
-            // Then deposits 10 bucks
-            // Since the tax for this kind of operation is 1% of the deposited amount, 
-            // the returned account must have balance equals to 29,9 dollars
-            Microsoft.AspNetCore.Mvc.OkObjectResult returnedValue = (Microsoft.AspNetCore.Mvc.OkObjectResult)controller.Deposit(1, 10);
-
-            Assert.AreEqual(29.9m, ((Account)returnedValue.Value).Balance);          
-        }
-
+        }        
 
         [Test]
         public void Transference_Transfers10DollarsFromAccountWith20DollarsToAccountWith10Dollars_SourceAccountShouldHave9DollarsAndDestinationAccountShouldHave20Dollars()
