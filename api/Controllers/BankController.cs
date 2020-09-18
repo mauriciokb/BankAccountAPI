@@ -40,7 +40,7 @@ namespace BankAccountWebAPI.Controllers
         {           
             if(String.IsNullOrWhiteSpace(ownerName))
             {
-                throw new ArgumentNullException("Onwer's name can't be empty.");
+                throw new ArgumentNullException("Onwer's name can't be empty.");                
             }
 
             Account acc = new Account(ownerName);
@@ -60,7 +60,7 @@ namespace BankAccountWebAPI.Controllers
             
             List<Account> accounts = withdrawOp.Execute(new List<int>() { accId }, amount);
 
-            return Ok(accounts);
+            return Ok(accounts.First());
         }
 
         [HttpPost]
@@ -71,9 +71,9 @@ namespace BankAccountWebAPI.Controllers
             if (amount < 0)
                 throw new ArgumentOutOfRangeException("Amount parameter can't be negative.");
 
-            List<Account> accounts = depositOp.Execute(new List<int>() { accId }, amount);   
+            List<Account> accounts = depositOp.Execute(new List<int>() { accId }, amount);
 
-            return Ok(accounts);    
+            return Ok(accounts.First());    
         }
 
         [HttpPost]
@@ -81,6 +81,9 @@ namespace BankAccountWebAPI.Controllers
         [Route("Transfer/{sourceAccId}/{destAccId}/{amount}")]
         public ActionResult Transfer(int sourceAccId, int destAccId, decimal amount)
         {
+            if(sourceAccId == destAccId)
+                throw new InvalidOperationException("Destination account must be different from source account.")
+                ;
             if (amount < 0)
                 throw new ArgumentOutOfRangeException("Amount parameter can't be negative.");
 

@@ -23,7 +23,7 @@ namespace BankAccountWebAPI
     {
         public bool Execute(SingleAccountOperation opData)
         {
-            decimal ammountToDeposit = opData.Amount + opData.TaxAmount;
+            decimal ammountToDeposit = (opData.Amount - opData.TaxAmount);
 
             opData.PrimaryAcc.Deposit(ammountToDeposit);
 
@@ -34,7 +34,7 @@ namespace BankAccountWebAPI
     }
 
     /// <summary>
-    /// Class responsible for executing transfer operations
+    /// Class responsible for executing transference operations
     /// </summary>
     public class TransferenceHandler : IOperation<DoubleAccountOperation>
     {

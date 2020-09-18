@@ -52,7 +52,10 @@ namespace BankAccountWebAPI
             taxApplier.Apply(operation);
 
             // Executes the operation
-            opHandler.Execute(operation);
+            if (!opHandler.Execute(operation))
+            {
+                throw new System.InvalidOperationException("Unable to perform this operation.");
+            }
 
             // Persists the operation
             opPersistor.Persist(operation);

@@ -53,7 +53,7 @@ namespace BankAccountWebAPI
 
                 int errorCode;
 
-                if (exception is ArgumentNullException || exception is ArgumentOutOfRangeException)
+                if (exception is ArgumentNullException || exception is ArgumentOutOfRangeException || exception is InvalidOperationException)
                     errorCode = (int)System.Net.HttpStatusCode.UnprocessableEntity;
                 else if (exception is KeyNotFoundException)
                     errorCode = (int)System.Net.HttpStatusCode.NotFound;

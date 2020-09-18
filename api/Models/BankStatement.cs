@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace BankAccountWebAPI
 {
-    class BankStatement
+    public class BankStatement
     {
         const int FirstColPadding = 25;
         const int SecondColPadding = 20;
