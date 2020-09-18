@@ -15,7 +15,7 @@ namespace BankAccountWebAPI
             this.PrimaryAccId = account.AccountId;
         }
 
-        public int Id { get; set; }
+        public int Id { get; private set; }
 
         public decimal Amount { get; set; }
 
@@ -60,4 +60,4 @@ namespace BankAccountWebAPI
         WIDTHDRAW,
         TRANSFERENCE,
     };
-    }
+}

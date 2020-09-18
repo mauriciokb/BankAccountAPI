@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace BankAccountWebAPI
 {
@@ -27,12 +29,11 @@ namespace BankAccountWebAPI
         {
             Context context = new Context();
 
-            // Injects the controller with the classes that uses SQLite with Entity to persist data
-            // services.AddSingleton<IPersist<BankAccount>>(entity => new EntityBankAccount(context));
-            services.AddSingleton<IReadData>(entity => new DatabaseReader(context));
-            // services.AddSingleton<IPersist<SingleAccountOperation>>(entity => new EntitySingleAccOp(context));
-            // services.AddSingleton<IPersist<DoubleAccountOperation>>(entity => new EntityDoubleAccOp(context));
-            services.AddSingleton<IPersist<object>>(entity => new DatabasePersistence(context));
+            services.AddSingleton<IDataReader>(new DatabaseReader(context));
+            services.AddSingleton<IPersistor<Account>>(new DatabasePersistence<Account>(context));
+            services.AddSingleton<Withdraw>(new Withdraw(new DatabaseReader(context), new DatabasePersistence<SingleAccountOperation>(context)));
+            services.AddSingleton<Deposit>(new Deposit(new DatabaseReader(context), new DatabasePersistence<SingleAccountOperation>(context)));
+            services.AddSingleton<Transference>(new Transference(new DatabaseReader(context), new DatabasePersistence<DoubleAccountOperation>(context)));      
 
             services.AddControllers();
         }
@@ -44,6 +45,24 @@ namespace BankAccountWebAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseExceptionHandler(a => a.Run(async context =>
+            {
+                var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerFeature>();
+                var exception = exceptionHandlerPathFeature.Error;
+
+                int errorCode;
+
+                if (exception is ArgumentNullException || exception is ArgumentOutOfRangeException)
+                    errorCode = (int)System.Net.HttpStatusCode.UnprocessableEntity;
+                else if (exception is KeyNotFoundException)
+                    errorCode = (int)System.Net.HttpStatusCode.NotFound;
+                else
+                    errorCode = (int)System.Net.HttpStatusCode.InternalServerError;
+
+                context.Response.StatusCode = errorCode;
+                await context.Response.WriteAsync(exception.Message);
+            }));         
 
             app.UseHttpsRedirection();
 

@@ -1,5 +1,12 @@
+using System.Collections.Generic;
+
 namespace BankAccountWebAPI
 {
+    public interface IOperationCreator<T>
+    {
+        T Create(List<Account> accounts, decimal amount);
+    }
+
     public interface IOperation<T>
     {
         bool Execute(T op);
@@ -7,18 +14,19 @@ namespace BankAccountWebAPI
 
     public interface ITaxApplier<T>
     {
-        bool Apply(T data);
+        void Apply(T data);
     }
 
-    public interface IPersist<T>
+    public interface IPersistor<T>
     {
         bool Persist(T data);
     }
 
-    public interface IReadData
+    public interface IDataReader
     {
-        bool GetAccountById(int id, out Account data);
-  
-        bool GetOperationsByAccountId(int id, out System.Collections.Generic.List<SingleAccountOperation> operations);
+        Account GetAccountById(int id);
+
+        System.Collections.Generic.List<SingleAccountOperation> GetOperationsByAccountId(int id);
     }
+
 }

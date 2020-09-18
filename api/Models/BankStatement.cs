@@ -74,7 +74,7 @@ namespace BankAccountWebAPI
             }
 
             // Adds the final balance
-            opStrList.Add(string.Format("{0,-40}{1}", "", account.Balance));
+            opStrList.Add(string.Format("{0}{1}", "Total:".PadRight(FirstColPadding+SecondColPadding), account.Balance));
 
             return string.Join(System.Environment.NewLine, opStrList);
         }

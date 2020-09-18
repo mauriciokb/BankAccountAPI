@@ -10,7 +10,7 @@ namespace BankAccountWebAPI
     /// It uses EF with SQLite
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class DatabasePersistence : IPersist<object> 
+    public class DatabasePersistence<T> : IPersistor<T> 
     {
         /// <summary>
         /// EF Context
@@ -22,7 +22,7 @@ namespace BankAccountWebAPI
             this.context = context;
         }
 
-        public bool Persist(object data)
+        public bool Persist(T data)
         {            
             context.Add(data);
 
@@ -42,7 +42,7 @@ namespace BankAccountWebAPI
     /// Class responsible for reading info from the database.
     /// It uses EF with SQLite.
     /// </summary>
-    public class DatabaseReader : IReadData
+    public class DatabaseReader : IDataReader
     {
         /// <summary>
         /// EF Context
@@ -54,25 +54,22 @@ namespace BankAccountWebAPI
             this.context = context;
         }
         
-        public bool GetAccountById(int id, out Account acc)
+        public Account GetAccountById(int id)
         {
-            acc = null;
-            
             var result = context.BankAccounts.Where(a => a.AccountId == id);
 
             if(result.Count() < 1)
             {
-                return false;
+                return null;
             }        
             
-            acc = result.First();
+            return result.First();
 
-            return true;
         }
 
-        public bool GetOperationsByAccountId(int id, out List<SingleAccountOperation> opList)
+        public List<SingleAccountOperation> GetOperationsByAccountId(int id)
         {
-            opList = new List<SingleAccountOperation>();
+            List<SingleAccountOperation> opList = new List<SingleAccountOperation>();
             
             // Selects all single acc operations associated with the given acc ID
             var singleAccOperations = context.SingleAccOperations.Include(a => a.PrimaryAcc).Where(a => a.PrimaryAccId == id &&  !(a is DoubleAccountOperation));
@@ -85,8 +82,8 @@ namespace BankAccountWebAPI
             opList.AddRange(singleAccOperations);
             // Adds the double acc operations to the output list (ps. double inherits from single)
             opList.AddRange(doubleAccOperations);
-   
-            return true;        
+
+            return opList;
         }
     }
 }

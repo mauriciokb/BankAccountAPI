@@ -12,41 +12,42 @@ namespace BankAccountWebAPI.Controllers
     [Route("[controller]")]
     public class BankController : ControllerBase
     {
-        //private IPersist<BankAccount> accPersist;
-        private IReadData dataReader;
-        private IPersist<object> genericPersist;
-     
-        public BankController(IReadData dataReader,
-                              IPersist<object> genericPersist)
+        private IDataReader dataReader;
+        private IPersistor<Account> accountPersistor;
+
+        private Withdraw withdrawOp;
+        private Deposit depositOp;
+        private Transference transferenceOp;
+
+        public BankController(IDataReader dataReader,
+                              IPersistor<Account> accountPersistor,
+                              Withdraw withdrawOp,
+                              Deposit depositOp,
+                              Transference transferenceOp)
         {
             this.dataReader = dataReader;
-            this.genericPersist = genericPersist;
+            this.accountPersistor = accountPersistor;
+            this.withdrawOp = withdrawOp;
+            this.depositOp = depositOp;
+            this.transferenceOp = transferenceOp;
         }
 
-       
+
         [HttpPost]
         [Route("CreateBankAccount")]
         [Route("CreateAccount/{ownerName}")]
         public ActionResult CreateBankAccount(string ownerName)
-        {
-            try
+        {           
+            if(String.IsNullOrWhiteSpace(ownerName))
             {
-                Account acc = new Account(ownerName);
+                throw new ArgumentNullException("Onwer's name can't be empty.");
+            }
 
-                //if(accPersist.Persist(acc))
-                if(genericPersist.Persist(acc))
-                {
-                    return Ok(acc);
-                }
-                else
-                {               
-                    return StatusCode((int)HttpStatusCode.InternalServerError, "Unknown error while persisting data.");
-                }
-            }
-            catch(Exception ex)
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError, "Exception msg: " + ex.Message);
-            }
+            Account acc = new Account(ownerName);
+
+            accountPersistor.Persist(acc);
+            
+            return Ok(acc);
         }
 
         [HttpPost]
@@ -54,43 +55,12 @@ namespace BankAccountWebAPI.Controllers
         [Route("Withdraw/{accId}/{amount}")]
         public ActionResult Withdraw(int accId, decimal amount)
         {
-            try
-            {
-                Account acc;
+            if (amount < 0)
+                throw new ArgumentOutOfRangeException("Amount parameter can't be negative.");
+            
+            List<Account> accounts = withdrawOp.Execute(new List<int>() { accId }, amount);
 
-                // Retrieve bank account
-                if(!dataReader.GetAccountById(accId, out acc))
-                {
-                    return NotFound("Unable to find bank account with the given ID (" + accId + ").");
-                }
-
-                // Creates the object with all the data necessary to perform a Withdraw
-                SingleAccountOperation withdrawOp = new SingleAccountOperation(acc);
-                withdrawOp.Amount = amount;
-                withdrawOp.OperationType = OperationType.WIDTHDRAW;
-        
-                // Creates the object responsible for carrying out the withdraw operation
-                WidthdrawHandler opHandler = new WidthdrawHandler();
-
-                // Creates the object responsible for calculating the tax associate with the operation
-                SingleAccountOpTaxHandler taxHandler = new SingleAccountOpTaxHandler(opHandler);
-
-                // Creates the object responsible for persisting the operation 
-                // SingleAccountOpPersistHandler persistHandler = new SingleAccountOpPersistHandler(taxHandler, singleAccOpPersist);
-                GenericPersistenceHandler<SingleAccountOperation> persistHandler = new GenericPersistenceHandler<SingleAccountOperation>(taxHandler, genericPersist);
-
-                // Executes the widhtraw
-                if(!persistHandler.Execute(withdrawOp))
-                {
-                    return StatusCode((int)HttpStatusCode.InternalServerError, "Unable to execute transfer.");
-                }
-
-                return Ok(acc);
-            }
-            catch(Exception ex)
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError, "Exception msg: " + ex.Message);
-            }
+            return Ok(accounts);
         }
 
         [HttpPost]
@@ -98,43 +68,12 @@ namespace BankAccountWebAPI.Controllers
         [Route("Deposit/{accId}/{amount}")]
         public ActionResult Deposit(int accId, decimal amount)
         {
-            try
-            {
-                Account acc;
+            if (amount < 0)
+                throw new ArgumentOutOfRangeException("Amount parameter can't be negative.");
 
-                // Retrieve bank account
-                if(!dataReader.GetAccountById(accId, out acc))
-                {
-                    return NotFound("Unable to find bank account with the given ID (" + accId + ").");
-                }
+            List<Account> accounts = depositOp.Execute(new List<int>() { accId }, amount);   
 
-                // Creates the object with all the data necessary to perform a deposit
-                SingleAccountOperation depositOp = new SingleAccountOperation(acc);
-                depositOp.Amount = amount;
-                depositOp.OperationType = OperationType.DEPOSIT;
-
-                // Creates the object responsible for carrying out the deposit operation
-                DepositHandler opHandler = new DepositHandler();
-
-                // Creates the object responsible for calculating the tax associate with the operation
-                SingleAccountOpTaxHandler taxHandler = new SingleAccountOpTaxHandler(opHandler);
-
-                // Creates the object responsible for persisting the operation 
-                // SingleAccountOpPersistHandler persistHandler = new SingleAccountOpPersistHandler(taxHandler, singleAccOpPersist);
-                GenericPersistenceHandler<SingleAccountOperation> persistHandler = new GenericPersistenceHandler<SingleAccountOperation>(taxHandler, genericPersist);
-
-                // Executes the widhtraw
-                if(!persistHandler.Execute(depositOp))
-                {
-                    return StatusCode((int)HttpStatusCode.InternalServerError, "Unable to execute transfer.");
-                }
-
-                return Ok(acc);
-            }
-            catch(Exception ex)
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError, "Exception msg: " + ex.Message);
-            }
+            return Ok(accounts);    
         }
 
         [HttpPost]
@@ -142,48 +81,13 @@ namespace BankAccountWebAPI.Controllers
         [Route("Transfer/{sourceAccId}/{destAccId}/{amount}")]
         public ActionResult Transfer(int sourceAccId, int destAccId, decimal amount)
         {
-            try
-            {
-                Account sourceAcc, destAcc;
+            if (amount < 0)
+                throw new ArgumentOutOfRangeException("Amount parameter can't be negative.");
 
-                // Retrieve source bank account
-                if(!dataReader.GetAccountById(sourceAccId, out sourceAcc))
-                {
-                    return NotFound("Unable to find source bank account with the given ID (" + sourceAccId + ").");
-                }
+            List<Account> accounts = transferenceOp.Execute(new List<int>() { sourceAccId, destAccId }, amount);
 
-                // Retrieve dest bank account
-                if(!dataReader.GetAccountById(destAccId, out destAcc))
-                {
-                    return NotFound("Unable to find destination bank account with the given ID (" + destAccId + ").");
-                }
-
-                // Creates the object with all the data necessary to perform a deposit
-                DoubleAccountOperation transferOp = new DoubleAccountOperation(sourceAcc, destAcc);
-                transferOp.Amount = amount;
-                transferOp.OperationType = OperationType.TRANSFERENCE;
-
-                // Creates the object responsible for carrying out the deposit operation
-                TransferHandler opHandler = new TransferHandler();
-
-                // Creates the object responsible for calculating the tax associate with the operation
-                DoubleAccountOpTaxHandler taxHandler = new DoubleAccountOpTaxHandler(opHandler);
-
-                // Creates the object responsible for persisting the operation 
-                GenericPersistenceHandler<DoubleAccountOperation> persistHandler = new GenericPersistenceHandler<DoubleAccountOperation>(taxHandler, genericPersist);
-
-                // Executes the widhtraw
-                if(!persistHandler.Execute(transferOp))
-                {
-                    return StatusCode((int)HttpStatusCode.InternalServerError, "Unable to execute transfer.");
-                }
-
-                return Ok(destAcc);
-            }
-            catch(Exception ex)
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError, "Exception msg: " + ex.Message);
-            }
+            // Returns ok status with both accounts
+            return Ok(accounts);
         }
 
         [HttpGet]
@@ -191,31 +95,20 @@ namespace BankAccountWebAPI.Controllers
         [Route("GetBankStatement/{accId}")]
         public ActionResult GetBankStatement(int accId)
         {
-            try
+            Account acc = dataReader.GetAccountById(accId);
+
+            if (acc == null)
             {
-                Account acc;
-
-                // Retrieve bank account
-                if (!dataReader.GetAccountById(accId, out acc))
-                {
-                    return NotFound("Unable to find bank account with the given ID (" + accId + ").");
-                }
-
-                // Retrieve associated operations 
-                List<SingleAccountOperation> operations;
-                if (!dataReader.GetOperationsByAccountId(accId, out operations))
-                {
-                    return StatusCode((int)HttpStatusCode.InternalServerError, "Unable to retrieve the operations associated to the account " + accId + ".");
-                }
-
-                BankStatement bankStatement = new BankStatement(acc, operations);
-
-                return Ok(bankStatement.ToString());
+                throw new System.Collections.Generic.KeyNotFoundException("Account (" + accId + ") not found.");
             }
-            catch (Exception ex)
-            {
-                return StatusCode((int)HttpStatusCode.InternalServerError, "Exception msg: " + ex.Message);
-            }
+
+            // Retrieve associated operations 
+            List<SingleAccountOperation> operations = dataReader.GetOperationsByAccountId(accId);   
+
+            BankStatement bankStatement = new BankStatement(acc, operations);
+
+            return Ok(bankStatement.ToString());     
+   
         }
         
     }
