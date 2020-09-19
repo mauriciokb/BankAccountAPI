@@ -6,9 +6,7 @@ namespace BankAccountWebAPI
     {
         public SingleAccountOperation Create(List<Account> accounts, decimal amount)
         {
-            SingleAccountOperation op = new SingleAccountOperation(accounts[0]);
-            op.Amount = amount;
-            op.OperationType = OperationType.WIDTHDRAW;
+            SingleAccountOperation op = new SingleAccountOperation(accounts[0], amount, OperationType.WIDTHDRAW);
 
             return op;
         }
@@ -18,9 +16,7 @@ namespace BankAccountWebAPI
     {
         public SingleAccountOperation Create(List<Account> accounts, decimal amount)
         {
-            SingleAccountOperation op = new SingleAccountOperation(accounts[0]);
-            op.Amount = amount;
-            op.OperationType = OperationType.DEPOSIT;
+            SingleAccountOperation op = new SingleAccountOperation(accounts[0], amount, OperationType.DEPOSIT);
 
             return op;
         }
@@ -30,10 +26,8 @@ namespace BankAccountWebAPI
     {
         public DoubleAccountOperation Create(List<Account> accounts, decimal amount)
         {
-            DoubleAccountOperation op = new DoubleAccountOperation(accounts[0], ((List<Account>)accounts)[1]);
-            op.Amount = amount;
-            op.OperationType = OperationType.TRANSFERENCE;
-
+            DoubleAccountOperation op = new DoubleAccountOperation(accounts[0], accounts[1], amount, OperationType.TRANSFERENCE);
+  
             return op;
         }
     }

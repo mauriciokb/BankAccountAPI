@@ -58,7 +58,7 @@ namespace TestProject
             {
                 // Mocks the reader to returns null, indicating no account was found
                 dataReaderMock.Setup(reader => reader.GetAccountById(1)).Returns(() => null);
-                controller.Deposit(1, 0);
+                controller.Deposit(1, 5);
             }
             catch (System.Collections.Generic.KeyNotFoundException)
             {
@@ -101,7 +101,7 @@ namespace TestProject
             {
                 // Mocks the reader to returns null, indicating no account was found
                 dataReaderMock.Setup(reader => reader.GetAccountById(1)).Returns(() => null);
-                controller.Withdraw(1, 0);
+                controller.Withdraw(1, 5);
             }
             catch (System.Collections.Generic.KeyNotFoundException)
             {
@@ -311,19 +311,15 @@ namespace TestProject
 
             #region Creates dummy bank statement
             DepositTaxApplier depositTaxApplier = new DepositTaxApplier();
-            SingleAccountOperation depositOp = new SingleAccountOperation(acc);
-            depositOp.OperationType = OperationType.DEPOSIT;
+            SingleAccountOperation depositOp = new SingleAccountOperation(acc, 20, OperationType.DEPOSIT);
             // Unfortunately I can't create a dummy timestamp. I should have used an IGetTime interface!
             depositOp.ExecutionTimeStamp = opList[0].ExecutionTimeStamp;
-            depositOp.Amount = 20;
             depositTaxApplier.Apply(depositOp);
 
             WithdrawTaxApplier withdrawTaxApplier = new WithdrawTaxApplier();
-            SingleAccountOperation withdrawOp = new SingleAccountOperation(acc);
-            withdrawOp.OperationType = OperationType.WIDTHDRAW;
+            SingleAccountOperation withdrawOp = new SingleAccountOperation(acc, 5, OperationType.WIDTHDRAW);
             // Unfortunately I can't create a dummy timestamp. I should have used an IGetTime interface!
             withdrawOp.ExecutionTimeStamp = opList[1].ExecutionTimeStamp;
-            withdrawOp.Amount = 5;
             withdrawTaxApplier.Apply(withdrawOp);
 
             decimal balance = 10m;
@@ -372,11 +368,9 @@ namespace TestProject
 
             #region Creates dummy bank statement
             TransferenceTaxApplier transferenceTaxApplier = new TransferenceTaxApplier();
-            DoubleAccountOperation transferenceOp = new DoubleAccountOperation(srcAcc, destAcc);
-            transferenceOp.OperationType = OperationType.TRANSFERENCE;
+            DoubleAccountOperation transferenceOp = new DoubleAccountOperation(srcAcc, destAcc, 10, OperationType.TRANSFERENCE);
             // Unfortunately I can't create a dummy timestamp. I should have used an IGetTime interface!
             transferenceOp.ExecutionTimeStamp = opList[0].ExecutionTimeStamp;
-            transferenceOp.Amount = 10;
             transferenceTaxApplier.Apply(transferenceOp);         
 
             decimal srcBalance = 30m;
