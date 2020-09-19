@@ -28,10 +28,10 @@ namespace BankAccountWebAPI.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Amount = table.Column<decimal>(nullable: false),
-                    TaxAmount = table.Column<decimal>(nullable: false),
-                    ExecutionTimeStamp = table.Column<DateTime>(nullable: false),
                     OperationType = table.Column<int>(nullable: false),
                     PrimaryAccId = table.Column<int>(nullable: false),
+                    TaxAmount = table.Column<decimal>(nullable: false),
+                    ExecutionTimeStamp = table.Column<DateTime>(nullable: false),
                     Discriminator = table.Column<string>(nullable: false),
                     SecondaryAccId = table.Column<int>(nullable: true),
                     ExtraTaxAmount = table.Column<decimal>(nullable: true)
