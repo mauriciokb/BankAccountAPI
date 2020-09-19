@@ -55,8 +55,8 @@ namespace BankAccountWebAPI.Controllers
         [Route("Withdraw/{accId}/{amount}")]
         public ActionResult Withdraw(int accId, decimal amount)
         {
-            if (amount < 0)
-                throw new ArgumentOutOfRangeException("Amount parameter can't be negative.");
+            if (amount <= 0)
+                throw new ArgumentOutOfRangeException("Amount parameter must be more than 0.");
             
             List<Account> accounts = withdrawOp.Execute(new List<int>() { accId }, amount);
 
@@ -68,8 +68,8 @@ namespace BankAccountWebAPI.Controllers
         [Route("Deposit/{accId}/{amount}")]
         public ActionResult Deposit(int accId, decimal amount)
         {
-            if (amount < 0)
-                throw new ArgumentOutOfRangeException("Amount parameter can't be negative.");
+            if (amount <= 0)
+                throw new ArgumentOutOfRangeException("Amount parameter must be more than 0.");
 
             List<Account> accounts = depositOp.Execute(new List<int>() { accId }, amount);
 
@@ -82,10 +82,10 @@ namespace BankAccountWebAPI.Controllers
         public ActionResult Transfer(int sourceAccId, int destAccId, decimal amount)
         {
             if(sourceAccId == destAccId)
-                throw new InvalidOperationException("Destination account must be different from source account.")
-                ;
-            if (amount < 0)
-                throw new ArgumentOutOfRangeException("Amount parameter can't be negative.");
+                throw new InvalidOperationException("Destination account must be different from source account.");
+
+            if (amount <= 0)
+                throw new ArgumentOutOfRangeException("Amount parameter must be more than 0.");
 
             List<Account> accounts = transferenceOp.Execute(new List<int>() { sourceAccId, destAccId }, amount);
 
